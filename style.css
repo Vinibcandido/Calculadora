@@ -5,10 +5,41 @@
 
 body {
   background-color: var(--bg-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
 }
+
 body * {
   font-family: "Poppins", sans-serif;
   color: var(--text-color);
+}
+
+.visor {
+  display: flex;
+  flex-direction: column;
+}
+
+#resultadoVisor {
+  width: 347px;
+  background-color: var(--bg-color);
+  border: none;
+  text-align: right;
+  font-size: 85px;
+}
+
+#resultadoVisor:focus {
+  outline: none;
+}
+
+#lblresultadoVisor {
+  margin-right: 10px;
+  color: #7d7d7d;
+  font-size: 14px;
+  text-align: right;
+  font-weight: 300;
 }
 
 .botoes {
@@ -33,14 +64,29 @@ body * {
 
 .aux {
   background-color: #a5a5a5;
+  transition: background-color 0.2s;
+}
+
+.aux:hover {
+  background-color: #cccccc;
 }
 
 .numeros {
   background-color: #333;
+  transition: background-color 0.2s;
+}
+
+.numeros:hover {
+  background-color: #4e4e4e;
 }
 
 .operadores {
   background-color: #ff9a0f;
+  transition: background-color 0.2s;
+}
+
+.operadores:hover {
+  background-color: #ffb74a;
 }
 
 #num0 {
@@ -48,4 +94,11 @@ body * {
   border-radius: 38.5px;
   text-align: left;
   width: 167px;
+}
+
+footer {
+  margin-top: 50px;
+  text-align: center;
+  color: #7d7d7d;
+  font-size: 14px;
 }
