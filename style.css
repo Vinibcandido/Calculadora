@@ -1,6 +1,7 @@
 :root {
   --bg-color: black;
   --text-color: white;
+  --lbl-resultadoVisor: #7d7d7d;
 }
 
 body {
@@ -17,13 +18,17 @@ body * {
   color: var(--text-color);
 }
 
+.container {
+  width: 347px;
+  height: 675px;
+}
+
 .visor {
   display: flex;
   flex-direction: column;
 }
 
 #resultadoVisor {
-  width: 347px;
   background-color: var(--bg-color);
   border: none;
   text-align: right;
@@ -36,14 +41,11 @@ body * {
 
 #lblresultadoVisor {
   margin-right: 10px;
-  color: #7d7d7d;
+  height: 15px;
+  color: var(--lbl-resultadoVisor);
   font-size: 14px;
   text-align: right;
   font-weight: 300;
-}
-
-.botoes {
-  width: 347px;
 }
 
 .botoes button {
@@ -68,7 +70,7 @@ body * {
 }
 
 .aux:hover {
-  background-color: #cccccc;
+  background-color: #c4c4c4;
 }
 
 .numeros {
@@ -77,16 +79,16 @@ body * {
 }
 
 .numeros:hover {
-  background-color: #4e4e4e;
+  background-color: #525252;
 }
 
 .operadores {
-  background-color: #ff9a0f;
+  background-color: #ff9f0a;
   transition: background-color 0.2s;
 }
 
 .operadores:hover {
-  background-color: #ffb74a;
+  background-color: #ffbe5d;
 }
 
 #num0 {
@@ -96,9 +98,16 @@ body * {
   width: 167px;
 }
 
-footer {
-  margin-top: 50px;
+.container footer {
   text-align: center;
-  color: #7d7d7d;
+  margin-top: 50px;
+  color: var(--lbl-resultadoVisor);
   font-size: 14px;
+  font-weight: 200;
+}
+
+.container footer span {
+  color: var(--lbl-resultadoVisor);
+  font-size: 14px;
+  font-weight: 300;
 }
