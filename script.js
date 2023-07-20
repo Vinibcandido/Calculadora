@@ -6,33 +6,11 @@ let _operadorSelecionado = false
 const lblresultadoVisor = document.getElementById("lblresultadoVisor")
 const resultadoVisor = document.getElementById("resultadoVisor")
 resultadoVisor.addEventListener("keypress", function (e) {
-  // Permitir apenas números e o ponto/virgula
-  var charCode = e.which ?? e.keyCode
-  var tecla = String.fromCharCode(charCode)
-  var valorAtual = e.target.value
-
-  if (
-    charCode > 31 &&
-    (charCode < 48 || charCode > 57) &&
-    charCode != 46 &&
-    charCode != 44
-  ) {
-    e.preventDefault()
-  } else if (
-    (tecla == "," || tecla == ".") &&
-    (valorAtual.includes(",") || valorAtual.includes("."))
-  ) {
-    // Impedir mais de uma vírgula ou ponto
-    e.preventDefault()
-  } else if ((tecla == "," || tecla == ".") && valorAtual.length == 0) {
-    // Impedir vírgula ou ponto no início
-    e.preventDefault()
-  } else {
-    return true
-  }
+  e.preventDefault()
 })
 
 function AdicionarNumeroAoVisor(numero) {
+  if (numero != ",") document.getElementById("limpeza").textContent = "C"
   if (_operadorSelecionado) {
     _operadorSelecionado = false
     resultadoVisor.value = ""
@@ -51,6 +29,7 @@ function LimparVisor() {
   lblresultadoVisor.textContent = ""
   resultadoVisor.value = ""
   _conteudoLblVisor = []
+  document.getElementById("limpeza").textContent = "AC"
 }
 
 function AtualizarLblVisor() {
@@ -63,14 +42,17 @@ function AtualizarLblVisor() {
 function ExecutarAcaoDeOperador(operador) {
   if (resultadoVisor.value != 0) {
     if (_conteudoLblVisor.length == 2 && operador != "=") {
-      let resultado = EfetuarOperacao(operador)
+      let resultado = EfetuarOperacao(operador, resultadoVisor.value)
       LimparVisor()
       _conteudoLblVisor.push(resultado)
       _conteudoLblVisor.push(operador)
       resultadoVisor.value = resultado
       _operadorSelecionado = true
     } else if (_conteudoLblVisor.length == 2 && operador == "=") {
-      let resultado = EfetuarOperacao(_conteudoLblVisor[1])
+      let resultado = EfetuarOperacao(
+        _conteudoLblVisor[1],
+        resultadoVisor.value
+      )
       _conteudoLblVisor.push(resultadoVisor.value)
       resultadoVisor.value = resultado
       _operadorSelecionado = true
@@ -78,6 +60,14 @@ function ExecutarAcaoDeOperador(operador) {
       _conteudoLblVisor = []
       _conteudoLblVisor.push(resultadoVisor.value)
       _conteudoLblVisor.push(operador)
+      _operadorSelecionado = true
+    } else if (_conteudoLblVisor.length == 3 && operador != "=") {
+      _conteudoLblVisor[0] = resultadoVisor.value
+      let resultado = EfetuarOperacao(
+        _conteudoLblVisor[1],
+        _conteudoLblVisor[2]
+      )
+      resultadoVisor.value = resultado
       _operadorSelecionado = true
     } else {
       _conteudoLblVisor.push(resultadoVisor.value)
@@ -88,23 +78,23 @@ function ExecutarAcaoDeOperador(operador) {
   }
 }
 
-function EfetuarOperacao(operador) {
+function EfetuarOperacao(operador, segundoValor) {
   let resultado
   switch (operador) {
     case "+":
-      resultado = Somar()
+      resultado = Somar(_conteudoLblVisor[0], segundoValor)
       break
 
     case "-":
-      resultado = Subtrair()
+      resultado = Subtrair(_conteudoLblVisor[0], segundoValor)
       break
 
     case "÷":
-      resultado = Dividir()
+      resultado = Dividir(_conteudoLblVisor[0], segundoValor)
       break
 
     case "×":
-      resultado = Multiplicar()
+      resultado = Multiplicar(_conteudoLblVisor[0], segundoValor)
       break
   }
   return substituirPontoPorVirgula(resultado)
@@ -118,30 +108,77 @@ function substituirPontoPorVirgula(str) {
   return String(str).replace(".", ",")
 }
 
-function Somar() {
+function Somar(primeiroValor, segundoValor) {
+  if (segundoValor.includes("%")) {
+    Number(substituirVirgulaPorPonto(primeiroValor)) *
+      (Number(substituirVirgulaPorPonto(segundoValor.replace("%", ""))) / 100)
+  }
   return (
-    Number(substituirVirgulaPorPonto(_conteudoLblVisor[0])) +
-    Number(substituirVirgulaPorPonto(resultadoVisor.value))
+    Number(substituirVirgulaPorPonto(primeiroValor)) +
+    Number(substituirVirgulaPorPonto(segundoValor))
   )
 }
 
-function Subtrair() {
+function Subtrair(primeiroValor, segundoValor) {
+  if (segundoValor.includes("%")) {
+    segundoValor =
+      Number(substituirVirgulaPorPonto(primeiroValor)) *
+      (Number(substituirVirgulaPorPonto(segundoValor.replace("%", ""))) / 100)
+  }
   return (
-    Number(substituirVirgulaPorPonto(_conteudoLblVisor[0])) -
-    Number(substituirVirgulaPorPonto(resultadoVisor.value))
+    Number(substituirVirgulaPorPonto(primeiroValor)) -
+    Number(substituirVirgulaPorPonto(segundoValor))
   )
 }
 
-function Dividir() {
+function Dividir(primeiroValor, segundoValor) {
+  if (segundoValor.includes("%")) {
+    segundoValor =
+      Number(substituirVirgulaPorPonto(primeiroValor)) *
+      (Number(substituirVirgulaPorPonto(segundoValor.replace("%", ""))) / 100)
+  }
+
   return (
-    Number(substituirVirgulaPorPonto(_conteudoLblVisor[0])) /
-    Number(substituirVirgulaPorPonto(resultadoVisor.value))
+    Number(substituirVirgulaPorPonto(primeiroValor)) /
+    Number(substituirVirgulaPorPonto(segundoValor))
   )
 }
 
-function Multiplicar() {
+function Multiplicar(primeiroValor, segundoValor) {
+  if (segundoValor.includes("%")) {
+    segundoValor =
+      Number(substituirVirgulaPorPonto(segundoValor.replace("%", ""))) / 100
+  }
   return (
-    Number(substituirVirgulaPorPonto(_conteudoLblVisor[0])) *
-    Number(substituirVirgulaPorPonto(resultadoVisor.value))
+    Number(substituirVirgulaPorPonto(primeiroValor)) *
+    Number(substituirVirgulaPorPonto(segundoValor))
   )
+}
+
+function Porcentar(primeiroValor, segundoValor) {
+  return (
+    (Number(substituirVirgulaPorPonto(primeiroValor)) / 100) *
+    Number(substituirVirgulaPorPonto(segundoValor))
+  )
+}
+
+function AplicarPorcentagem() {
+  if (resultadoVisor.value.length != 0) {
+    if (_conteudoLblVisor.length == 3 && _conteudoLblVisor[1] == "%") {
+      _conteudoLblVisor = []
+    }
+    if (_conteudoLblVisor.length == 0) {
+      console.log("conteudoLblVisorZero")
+      _conteudoLblVisor.push(resultadoVisor.value)
+      _conteudoLblVisor.push("%")
+      _operadorSelecionado = true
+    }
+  }
+  AtualizarLblVisor()
+}
+
+function PositivarOuNegativar() {
+  if (resultadoVisor.value[0] == "-")
+    resultadoVisor.value = resultadoVisor.value.replace("-", "")
+  else resultadoVisor.value = "-" + resultadoVisor.value
 }
