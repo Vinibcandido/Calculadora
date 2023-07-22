@@ -1,101 +1,130 @@
 //Variaveis globais para transporte de dados
-let _conteudoLblVisor = []
+let _conteudoVisorSecundario = []
 let _operadorSelecionado = false
+const maxChars = 6
 
 //Visor da calculadora
-const lblresultadoVisor = document.getElementById("lblresultadoVisor")
-const resultadoVisor = document.getElementById("resultadoVisor")
-resultadoVisor.addEventListener("keypress", function (e) {
-  e.preventDefault()
-})
+const visorSecundario = document.getElementById("visorSecundario")
+const visorPrincipal = document.getElementById("visorPrincipal")
 
 function AdicionarNumeroAoVisor(numero) {
   if (numero != ",") document.getElementById("limpeza").textContent = "C"
   if (_operadorSelecionado) {
     _operadorSelecionado = false
-    resultadoVisor.value = ""
+    visorPrincipal.textContent = ""
   }
-  let valorAtual = resultadoVisor.value
-  if (numero == "," && (valorAtual.includes(",") || valorAtual.includes("."))) {
-    return true
-  } else if (numero == "," && valorAtual.length == 0) {
+  if (
+    numero == "," &&
+    (visorPrincipal.textContent.includes(",") ||
+      visorPrincipal.textContent.length == 0)
+  ) {
     return true
   } else {
-    resultadoVisor.value += numero
+    visorPrincipal.textContent += numero
   }
 }
 
-function LimparVisor() {
-  lblresultadoVisor.textContent = ""
-  resultadoVisor.value = ""
-  _conteudoLblVisor = []
+function LimparVisores() {
+  visorSecundario.textContent = ""
+  visorPrincipal.textContent = ""
+  _conteudoVisorSecundario = []
   document.getElementById("limpeza").textContent = "AC"
 }
 
 function AtualizarLblVisor() {
-  lblresultadoVisor.textContent = ""
-  for (let n = 0; n < _conteudoLblVisor.length; n++) {
-    lblresultadoVisor.textContent += _conteudoLblVisor[n]
+  visorSecundario.textContent = ""
+  for (let i = 0; i < _conteudoVisorSecundario.length; i++) {
+    visorSecundario.textContent += _conteudoVisorSecundario[i]
   }
 }
 
 function ExecutarAcaoDeOperador(operador) {
-  if (resultadoVisor.value != 0) {
-    if (_conteudoLblVisor.length == 2 && operador != "=") {
-      let resultado = EfetuarOperacao(operador, resultadoVisor.value)
-      LimparVisor()
-      _conteudoLblVisor.push(resultado)
-      _conteudoLblVisor.push(operador)
-      resultadoVisor.value = resultado
-      _operadorSelecionado = true
-    } else if (_conteudoLblVisor.length == 2 && operador == "=") {
-      let resultado = EfetuarOperacao(
-        _conteudoLblVisor[1],
-        resultadoVisor.value
-      )
-      _conteudoLblVisor.push(resultadoVisor.value)
-      resultadoVisor.value = resultado
-      _operadorSelecionado = true
-    } else if (_conteudoLblVisor.length == 3 && operador != "=") {
-      _conteudoLblVisor = []
-      _conteudoLblVisor.push(resultadoVisor.value)
-      _conteudoLblVisor.push(operador)
-      _operadorSelecionado = true
-    } else if (_conteudoLblVisor.length == 3 && operador != "=") {
-      _conteudoLblVisor[0] = resultadoVisor.value
-      let resultado = EfetuarOperacao(
-        _conteudoLblVisor[1],
-        _conteudoLblVisor[2]
-      )
-      resultadoVisor.value = resultado
-      _operadorSelecionado = true
-    } else {
-      _conteudoLblVisor.push(resultadoVisor.value)
-      _conteudoLblVisor.push(operador)
-      _operadorSelecionado = true
-    }
+  if (
+    visorPrincipal.textContent != 0 ||
+    (_conteudoVisorSecundario[1] != "%" &&
+      _conteudoVisorSecundario.length != 3 &&
+      operador != "=")
+  ) {
+    if (_conteudoVisorSecundario.length == 2 && operador != "=")
+      ContinuarContaComNovoOperador(operador)
+    else if (_conteudoVisorSecundario.length == 2 && operador == "=")
+      ApresentarResultadoFinal()
+    else if (_conteudoVisorSecundario.length == 3 && operador != "=")
+      UtilizarResultadoFinalEmNovaOperacao(operador)
+    else if (
+      _conteudoVisorSecundario.length == 3 &&
+      _conteudoVisorSecundario[1] != "%" &&
+      operador == "="
+    )
+      IncrementarComUltimoOperadorEscolhido()
+    else AdicionarValorEOperadorAoHistorico(operador)
     AtualizarLblVisor()
   }
+}
+
+function ContinuarContaComNovoOperador(operador) {
+  let resultado = EfetuarOperacao(operador, visorPrincipal.textContent)
+  LimparVisores()
+  _conteudoVisorSecundario.push(resultado)
+  _conteudoVisorSecundario.push(operador)
+  visorPrincipal.textContent = resultado
+  _operadorSelecionado = true
+}
+
+function ApresentarResultadoFinal() {
+  let resultado = EfetuarOperacao(
+    _conteudoVisorSecundario[1],
+    visorPrincipal.textContent
+  )
+  _conteudoVisorSecundario.push(visorPrincipal.textContent)
+  visorPrincipal.textContent = resultado
+  _operadorSelecionado = true
+}
+
+function UtilizarResultadoFinalEmNovaOperacao(operador) {
+  _conteudoVisorSecundario = []
+  _conteudoVisorSecundario.push(visorPrincipal.textContent)
+  _conteudoVisorSecundario.push(operador)
+  _operadorSelecionado = true
+}
+
+function IncrementarComUltimoOperadorEscolhido() {
+  _conteudoVisorSecundario[0] = visorPrincipal.textContent
+  let resultado = EfetuarOperacao(
+    _conteudoVisorSecundario[1],
+    _conteudoVisorSecundario[2]
+  )
+  visorPrincipal.textContent = resultado
+  _operadorSelecionado = true
+}
+
+function AdicionarValorEOperadorAoHistorico(operador) {
+  _conteudoVisorSecundario.push(visorPrincipal.textContent)
+  _conteudoVisorSecundario.push(operador)
+  _operadorSelecionado = true
 }
 
 function EfetuarOperacao(operador, segundoValor) {
   let resultado
   switch (operador) {
     case "+":
-      resultado = Somar(_conteudoLblVisor[0], segundoValor)
+      resultado = Somar(_conteudoVisorSecundario[0], segundoValor)
       break
 
     case "-":
-      resultado = Subtrair(_conteudoLblVisor[0], segundoValor)
+      resultado = Subtrair(_conteudoVisorSecundario[0], segundoValor)
       break
 
     case "÷":
-      resultado = Dividir(_conteudoLblVisor[0], segundoValor)
+      resultado = Dividir(_conteudoVisorSecundario[0], segundoValor)
       break
 
     case "×":
-      resultado = Multiplicar(_conteudoLblVisor[0], segundoValor)
+      resultado = Multiplicar(_conteudoVisorSecundario[0], segundoValor)
       break
+
+    case "%":
+      resultado = Porcentar(_conteudoVisorSecundario[0], segundoValor)
   }
   return substituirPontoPorVirgula(resultado)
 }
@@ -110,9 +139,11 @@ function substituirPontoPorVirgula(str) {
 
 function Somar(primeiroValor, segundoValor) {
   if (segundoValor.includes("%")) {
-    Number(substituirVirgulaPorPonto(primeiroValor)) *
+    segundoValor =
+      Number(substituirVirgulaPorPonto(primeiroValor)) *
       (Number(substituirVirgulaPorPonto(segundoValor.replace("%", ""))) / 100)
   }
+
   return (
     Number(substituirVirgulaPorPonto(primeiroValor)) +
     Number(substituirVirgulaPorPonto(segundoValor))
@@ -125,6 +156,7 @@ function Subtrair(primeiroValor, segundoValor) {
       Number(substituirVirgulaPorPonto(primeiroValor)) *
       (Number(substituirVirgulaPorPonto(segundoValor.replace("%", ""))) / 100)
   }
+
   return (
     Number(substituirVirgulaPorPonto(primeiroValor)) -
     Number(substituirVirgulaPorPonto(segundoValor))
@@ -149,6 +181,7 @@ function Multiplicar(primeiroValor, segundoValor) {
     segundoValor =
       Number(substituirVirgulaPorPonto(segundoValor.replace("%", ""))) / 100
   }
+
   return (
     Number(substituirVirgulaPorPonto(primeiroValor)) *
     Number(substituirVirgulaPorPonto(segundoValor))
@@ -163,22 +196,52 @@ function Porcentar(primeiroValor, segundoValor) {
 }
 
 function AplicarPorcentagem() {
-  if (resultadoVisor.value.length != 0) {
-    if (_conteudoLblVisor.length == 3 && _conteudoLblVisor[1] == "%") {
-      _conteudoLblVisor = []
+  if (visorPrincipal.textContent.length != 0) {
+    if (
+      _conteudoVisorSecundario.length == 3 &&
+      _conteudoVisorSecundario[1] == "%"
+    ) {
+      _conteudoVisorSecundario = []
     }
-    if (_conteudoLblVisor.length == 0) {
-      console.log("conteudoLblVisorZero")
-      _conteudoLblVisor.push(resultadoVisor.value)
-      _conteudoLblVisor.push("%")
+    if (_conteudoVisorSecundario.length == 0) {
+      _conteudoVisorSecundario.push(visorPrincipal.textContent)
+      _conteudoVisorSecundario.push("%")
+      visorPrincipal.textContent += "%"
       _operadorSelecionado = true
+    } else {
+      visorPrincipal.textContent += "%"
     }
   }
   AtualizarLblVisor()
 }
 
 function PositivarOuNegativar() {
-  if (resultadoVisor.value[0] == "-")
-    resultadoVisor.value = resultadoVisor.value.replace("-", "")
-  else resultadoVisor.value = "-" + resultadoVisor.value
+  if (
+    visorPrincipal.textContent.length != 0 &&
+    visorPrincipal.textContent != "0"
+  ) {
+    if (visorPrincipal.textContent[0] == "-")
+      visorPrincipal.textContent = visorPrincipal.textContent.replace("-", "")
+    else visorPrincipal.textContent = "-" + visorPrincipal.textContent
+  }
+}
+
+function Backspace() {
+  let index =
+    visorPrincipal.textContent.length - 1 < 0
+      ? 0
+      : visorPrincipal.textContent.length - 1
+
+  if (visorPrincipal.textContent.length == 1) {
+    visorPrincipal.textContent = ""
+    if (_conteudoVisorSecundario.length == 0)
+      document.getElementById("limpeza").textContent = "AC"
+  } else {
+    console.log(index)
+    let visorEmArray = visorPrincipal.textContent.split("")
+    console.log(visorEmArray)
+    visorEmArray = visorEmArray.splice(0, index)
+    console.log(visorEmArray.join(""))
+    visorPrincipal.textContent = visorEmArray.join("")
+  }
 }
